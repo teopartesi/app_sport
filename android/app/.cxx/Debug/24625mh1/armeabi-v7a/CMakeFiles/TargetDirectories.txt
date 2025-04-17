@@ -1,0 +1,2 @@
+C:/Users/teopa/application_sport/app_sport/android/app/.cxx/Debug/24625mh1/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/teopa/application_sport/app_sport/android/app/.cxx/Debug/24625mh1/armeabi-v7a/CMakeFiles/rebuild_cache.dir

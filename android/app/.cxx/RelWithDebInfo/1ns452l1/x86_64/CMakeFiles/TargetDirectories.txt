@@ -1,0 +1,2 @@
+C:/Users/teopa/application_sport/app_sport/android/app/.cxx/RelWithDebInfo/1ns452l1/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/teopa/application_sport/app_sport/android/app/.cxx/RelWithDebInfo/1ns452l1/x86_64/CMakeFiles/rebuild_cache.dir
