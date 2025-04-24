@@ -63,10 +63,18 @@ flutter:
     - assets/icon/back.png
     - assets/icon/biceps.png
     - assets/icon/chest.png
+    - assets/icon/entre_jambes.png
+    - assets/icon/front_legs.png
+    - assets/icon/glutes.png
+    - assets/icon/lats.png
     - assets/icon/legs.png
-    - assets/icon/triceps.png
+    - assets/icon/lower_back.png
+    - assets/icon/mollet.png
+    - assets/icon/quads.png
     - assets/icon/shoulders.png
-    
+    - assets/icon/trapeze.png
+    - assets/icon/triceps.png
+
     - assets/logo/logo_appli_muscu.png
 
   # The following line ensures that the Material Icons font is
