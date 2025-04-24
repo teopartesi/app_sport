@@ -29,33 +29,38 @@ class _SportAppState extends State<SportApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: MaterialColor(0xFF01BEFD, {
-          50: Color(0xFFE1F7FE),
-          100: Color(0xFFB3ECFD),
-          200: Color(0xFF80E1FC),
-          300: Color(0xFF4DD6FB),
-          400: Color(0xFF26CDFB),
-          500: Color(0xFF00BFFD), // valeur principale
-          600: Color(0xFF01A8E3),
-          700: Color(0xFF018FC7),
-          800: Color(0xFF0176AB),
-          900: Color(0xFF01578A),
-        }),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        scaffoldBackgroundColor: Colors.white, // Couleur de fond de l'application
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          selectedItemColor: Color(0xFF00BFFD), // Couleur des icônes sélectionnées
-          unselectedItemColor: Colors.grey, // Couleur des icônes non sélectionnées
-          backgroundColor: Colors.white, // Couleur de fond du menu
+        useMaterial3: true, // Activer Material Design 3
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Color(0xFF00BFFD),
+          brightness: Brightness.light,
         ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: Color(0xFF00BFFD), // Couleur du texte des boutons interactifs
-          ),
+        fontFamily: 'Roboto',
+        appBarTheme: AppBarTheme(
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: Color(0xFF00BFFD),
+          foregroundColor: Colors.white,
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          selectedItemColor: Color(0xFF00BFFD),
+          unselectedItemColor: Colors.grey,
+          backgroundColor: Colors.white,
+          elevation: 8,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            foregroundColor: Color(0xFF00BFFD), // Couleur du texte des boutons interactifs
+            backgroundColor: Color(0xFF00BFFD),
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+        cardTheme: CardTheme(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
