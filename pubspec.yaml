@@ -1,5 +1,5 @@
 name: app_sport
-description: "A new Flutter project."
+description: "Application de sport pour suivi des performances et faire des séances organisées"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -58,6 +58,16 @@ flutter_launcher_icons:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/icon/abdos.png
+    - assets/icon/back.png
+    - assets/icon/biceps.png
+    - assets/icon/chest.png
+    - assets/icon/legs.png
+    - assets/icon/triceps.png
+    - assets/icon/shoulders.png
+    
+    - assets/logo/logo_appli_muscu.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
