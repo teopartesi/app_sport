@@ -14,25 +14,133 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
     "Bicep Curls", "Tricep Extensions", "Calf Raises", "Plank",
     "Russian Twists", "Lat Pulldowns", "Leg Curls", "Leg Extensions"
   ];
-  List<String> selectedExercises = [];
   List<WorkoutSession> savedWorkouts = [];
 
-  TextEditingController workoutNameController = TextEditingController();
+  Widget _buildSelectExercisesDialog(BuildContext context) {
+    TextEditingController searchController = TextEditingController();
+    List<String> filteredExercises = List.from(availableExercises);
+    List<String> selectedExercises = [];
 
-  void addWorkout() {
-    if (workoutNameController.text.isNotEmpty && selectedExercises.isNotEmpty) {
-      setState(() {
-        savedWorkouts.add(WorkoutSession(
-          name: workoutNameController.text,
-          exercises: List.from(selectedExercises),
-        ));
-        workoutNameController.clear();
-        selectedExercises.clear();
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Séance '${workoutNameController.text}' enregistrée !")),
-      );
-    }
+    return StatefulBuilder(
+      builder: (context, setState) {
+        void filterExercises(String query) {
+          setState(() {
+            filteredExercises = availableExercises
+                .where((exercise) =>
+                    exercise.toLowerCase().contains(query.toLowerCase()))
+                .toList();
+          });
+        }
+
+        return AlertDialog(
+          title: Text("Sélectionner des exercices"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    labelText: "Rechercher un exercice",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                  onChanged: filterExercises,
+                ),
+                SizedBox(height: 16),
+                Container(
+                  height: 200,
+                  child: ListView.builder(
+                    itemCount: filteredExercises.length,
+                    itemBuilder: (context, index) {
+                      String exercise = filteredExercises[index];
+                      bool isSelected = selectedExercises.contains(exercise);
+                      return CheckboxListTile(
+                        title: Text(exercise),
+                        value: isSelected,
+                        activeColor: Theme.of(context).colorScheme.primary,
+                        onChanged: (value) {
+                          setState(() {
+                            if (value == true) {
+                              selectedExercises.add(exercise);
+                            } else {
+                              selectedExercises.remove(exercise);
+                            }
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Annuler"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (selectedExercises.isNotEmpty) {
+                  Navigator.pop(context);
+                  _showNameWorkoutDialog(context, selectedExercises);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Veuillez sélectionner au moins un exercice")),
+                  );
+                }
+              },
+              child: Text("Suivant"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showNameWorkoutDialog(BuildContext context, List<String> selectedExercises) {
+    TextEditingController workoutNameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Nom de la séance"),
+          content: TextField(
+            controller: workoutNameController,
+            decoration: InputDecoration(
+              labelText: "Nom de la séance",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Annuler"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (workoutNameController.text.isNotEmpty) {
+                  setState(() {
+                    savedWorkouts.add(WorkoutSession(
+                      name: workoutNameController.text,
+                      exercises: selectedExercises,
+                    ));
+                  });
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Veuillez entrer un nom pour la séance")),
+                  );
+                }
+              },
+              child: Text("Créer"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void launchWorkout(WorkoutSession workout) {
@@ -47,8 +155,9 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true, // Permet de redimensionner les widgets
       appBar: AppBar(
-        title: Text("Planification"),
+        title: Text("Planification", style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
@@ -56,92 +165,12 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Créer une nouvelle séance",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: workoutNameController,
-                      decoration: InputDecoration(
-                        labelText: "Nom de la séance",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        prefixIcon: Icon(Icons.title),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      "Sélectionner des exercices:",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 8),
-            Expanded(
-              flex: 2,
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 2,
-                child: ListView.builder(
-                  itemCount: availableExercises.length,
-                  itemBuilder: (context, index) {
-                    String exercise = availableExercises[index];
-                    bool isSelected = selectedExercises.contains(exercise);
-                    return CheckboxListTile(
-                      title: Text(exercise),
-                      value: isSelected,
-                      activeColor: Theme.of(context).colorScheme.primary,
-                      onChanged: (value) {
-                        setState(() {
-                          if (value == true) {
-                            selectedExercises.add(exercise);
-                          } else {
-                            selectedExercises.remove(exercise);
-                          }
-                        });
-                      },
-                    );
-                  },
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: addWorkout,
-                icon: Icon(Icons.save),
-                label: Text("Enregistrer la séance"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  minimumSize: Size(200, 50),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
             Text(
               "Séances enregistrées",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Expanded(
-              flex: 1,
               child: savedWorkouts.isEmpty
                   ? Center(
                       child: Text(
@@ -170,8 +199,7 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
-                              savedWorkouts[index].exercises.length.toString() + 
-                              " exercices",
+                              "${savedWorkouts[index].exercises.length} exercices",
                               style: TextStyle(color: Colors.grey),
                             ),
                             trailing: ElevatedButton.icon(
@@ -190,6 +218,18 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return _buildSelectExercisesDialog(context);
+            },
+          );
+        },
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: Icon(Icons.add),
       ),
     );
   }

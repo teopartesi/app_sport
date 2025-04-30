@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:app_sport/main.dart';
+import 'package:agys/main.dart';
 
 void main() {
   testWidgets('Test du rendu de l\'application', (WidgetTester tester) async {

@@ -1,5 +1,5 @@
-name: app_sport
-description: "Application de sport pour suivi des performances et faire des séances organisées"
+name: agys
+description: "Application de sport pour suivi des performances et faire des séances organisées, AGYS est un mélange de AGôn (compétition, sport) et ischYS (force, puissance) donne un nom à la fois enraciné dans la culture grecque et porteur de sens fort. "
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
