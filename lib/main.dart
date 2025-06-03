@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'pages/profile_page.dart';
 import 'pages/performance_page.dart';
 import 'pages/workout_planner_page.dart';
+import 'pages/goal_page.dart';
 
 void main() {
   runApp(SportApp());
@@ -17,6 +18,7 @@ class _SportAppState extends State<SportApp> {
   final List<Widget> _pages = [
     PerformancePage(),
     WorkoutPlannerPage(),
+    GoalsPage(),
     ProfilePage(),
   ];
 
@@ -72,6 +74,7 @@ class _SportAppState extends State<SportApp> {
           items: [
             BottomNavigationBarItem(icon: Icon(Icons.fitness_center), label: "Performances"),
             BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Planification"),
+            BottomNavigationBarItem(icon: Icon(Icons.flag), label: "Objectifs"), // Ajoute cet item
             BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
           ],
         ),

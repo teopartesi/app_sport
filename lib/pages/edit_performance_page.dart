@@ -1,4 +1,3 @@
-// Créer un nouveau fichier edit_performance_page.dart
 import 'package:flutter/material.dart';
 import '../models/exercise_performance.dart';
 import '../models/exercise_structure.dart';
