@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/exercise_performance.dart';
+import 'package:provider/provider.dart';
 import '../models/exercise_structure.dart';
+import '../state/performance_state.dart';
 import 'edit_performance_page.dart'; 
 
 class ExerciseListPage extends StatefulWidget {
@@ -13,24 +14,23 @@ class ExerciseListPage extends StatefulWidget {
 }
 
 class _ExerciseListPageState extends State<ExerciseListPage> {
-  Map<String, ExercisePerformance> performances = {}; // Stocke les performances
-
-  String _performanceKey(Exercise exercise) {
-    return "${widget.muscleGroup.name}::${exercise.name}";
-  }
-
   void _editPerformance(BuildContext context, Exercise exercise) {
-    final key = _performanceKey(exercise);
+    final performanceState = context.read<PerformanceState>();
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EditPerformancePage(
           exercise: exercise,
-          initialPerformance: performances[key],
+          initialPerformance: performanceState.getPerformance(
+            widget.muscleGroup,
+            exercise,
+          ),
           onSave: (performance) {
-            setState(() {
-              performances[key] = performance;
-            });
+            performanceState.savePerformance(
+              widget.muscleGroup,
+              exercise,
+              performance,
+            );
           },
         ),
       ),
@@ -39,6 +39,7 @@ class _ExerciseListPageState extends State<ExerciseListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final performanceState = context.watch<PerformanceState>();
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.muscleGroup.name),
@@ -60,7 +61,10 @@ class _ExerciseListPageState extends State<ExerciseListPage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               children: category.exercises.map((exercise) {
-                final lastPerformance = performances[_performanceKey(exercise)];
+                final lastPerformance = performanceState.getPerformance(
+                  widget.muscleGroup,
+                  exercise,
+                );
 
                 return Container(
                   margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),

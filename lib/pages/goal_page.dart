@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/goal.dart';
+import '../state/goals_state.dart';
 
 class GoalsPage extends StatefulWidget {
   @override
@@ -7,64 +9,19 @@ class GoalsPage extends StatefulWidget {
 }
 
 class _GoalsPageState extends State<GoalsPage> {
-  List<Goal> goals = [
-    // Exemples d'objectifs par défaut
-    Goal(
-      id: "1",
-      exerciseName: "Développé couché",
-      goalType: "weight",
-      currentValue: 80,
-      targetValue: 100,
-      startDate: DateTime.now().subtract(Duration(days: 30)),
-      targetDate: DateTime.now().add(Duration(days: 60)),
-      description: "Atteindre 100kg au développé couché",
-    ),
-    Goal(
-      id: "2",
-      exerciseName: "Séances hebdomadaires",
-      goalType: "sessions",
-      currentValue: 3,
-      targetValue: 5,
-      startDate: DateTime.now().subtract(Duration(days: 7)),
-      targetDate: DateTime.now().add(Duration(days: 21)),
-      description: "5 séances par semaine",
-    ),
-  ];
-
-  // Statistiques de progression hebdomadaire
-  Map<String, int> weeklyStats = {
-    "sessions": 3,
-    "targetSessions": 5,
-    "exercises": 15,
-    "targetExercises": 25,
-    "minutes": 120,
-    "targetMinutes": 200,
-  };
-/*
-  void _addGoal(Goal newGoal) {
-    setState(() {
-      goals.add(newGoal);
-    });
-  }
-*/
   void _updateGoalProgress(String goalId, double newValue) {
-    setState(() {
-      final goalIndex = goals.indexWhere((goal) => goal.id == goalId);
-      if (goalIndex != -1) {
-        goals[goalIndex].currentValue = newValue;
-        goals[goalIndex].isCompleted = newValue >= goals[goalIndex].targetValue;
-      }
-    });
+    context.read<GoalsState>().updateGoalProgress(goalId, newValue);
   }
 
   void _deleteGoal(String goalId) {
-    setState(() {
-      goals.removeWhere((goal) => goal.id == goalId);
-    });
+    context.read<GoalsState>().deleteGoal(goalId);
   }
 
   @override
   Widget build(BuildContext context) {
+    final goalsState = context.watch<GoalsState>();
+    final goals = goalsState.goals;
+    final weeklyStats = goalsState.weeklyStats;
     return Scaffold(
       appBar: AppBar(
         title: Text("Objectifs", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -476,6 +433,7 @@ class _GoalsPageState extends State<GoalsPage> {
   }
 
   void _showEditWeeklyGoalsDialog() {
+    final weeklyStats = context.read<GoalsState>().weeklyStats;
     Map<String, TextEditingController> controllers = {
       'sessions': TextEditingController(text: weeklyStats["targetSessions"].toString()),
       'exercises': TextEditingController(text: weeklyStats["targetExercises"].toString()),
@@ -524,15 +482,15 @@ class _GoalsPageState extends State<GoalsPage> {
               child: Text("Annuler"),
             ),
             ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      final sessionsTarget = int.tryParse(controllers['sessions']!.text) ?? 5;
-                      final exercisesTarget = int.tryParse(controllers['exercises']!.text) ?? 25;
-                      final minutesTarget = int.tryParse(controllers['minutes']!.text) ?? 200;
-                      weeklyStats["targetSessions"] = sessionsTarget < 1 ? 1 : sessionsTarget;
-                      weeklyStats["targetExercises"] = exercisesTarget < 1 ? 1 : exercisesTarget;
-                      weeklyStats["targetMinutes"] = minutesTarget < 1 ? 1 : minutesTarget;
-                    });
+              onPressed: () {
+                final sessionsTarget = int.tryParse(controllers['sessions']!.text) ?? 5;
+                final exercisesTarget = int.tryParse(controllers['exercises']!.text) ?? 25;
+                final minutesTarget = int.tryParse(controllers['minutes']!.text) ?? 200;
+                context.read<GoalsState>().updateWeeklyTargets(
+                      sessionsTarget: sessionsTarget,
+                      exercisesTarget: exercisesTarget,
+                      minutesTarget: minutesTarget,
+                    );
                 Navigator.pop(context);
               },
               child: Text("Enregistrer"),
