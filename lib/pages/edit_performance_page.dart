@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/exercise_performance.dart';
 import '../models/exercise_structure.dart';
+import '../services/exercise_performance_service.dart';
 
 class EditPerformancePage extends StatefulWidget {
   final Exercise exercise;
@@ -19,6 +20,7 @@ class EditPerformancePage extends StatefulWidget {
 }
 
 class _EditPerformancePageState extends State<EditPerformancePage> {
+  final ExercisePerformanceService _service = ExercisePerformanceService();
   late String selectedEquipment;
   late List<ExerciseSet> sets;
 
@@ -26,26 +28,18 @@ class _EditPerformancePageState extends State<EditPerformancePage> {
   void initState() {
     super.initState();
     selectedEquipment = widget.initialPerformance?.equipment ?? widget.exercise.equipmentTypes.first;
-    sets = widget.initialPerformance?.sets != null && widget.initialPerformance!.sets.isNotEmpty
-        ? List.from(widget.initialPerformance!.sets)
-        : [ExerciseSet(weight: 0, reps: 0)];
+    sets = _service.buildInitialSets(widget.initialPerformance);
   }
 
   void addSet() {
     setState(() {
-      // Copier le dernier set pour faciliter l'entrée des données
-      if (sets.isNotEmpty) {
-        final lastSet = sets.last;
-        sets.add(ExerciseSet(weight: lastSet.weight, reps: lastSet.reps));
-      } else {
-        sets.add(ExerciseSet(weight: 0, reps: 0));
-      }
+      sets = _service.addSet(sets);
     });
   }
 
   void removeSet(int index) {
     setState(() {
-      sets.removeAt(index);
+      sets = _service.removeSet(sets, index);
     });
   }
 
@@ -55,7 +49,7 @@ class _EditPerformancePageState extends State<EditPerformancePage> {
         ExercisePerformance(
           exerciseName: widget.exercise.name,
           equipment: selectedEquipment,
-          sets: sets.where((set) => set.weight > 0 || set.reps > 0).toList(),
+          sets: _service.filterValidSets(sets),
         ),
       );
       Navigator.of(context).pop();
@@ -345,10 +339,10 @@ class _EditPerformancePageState extends State<EditPerformancePage> {
   }
 
   int _calculateTotalWeight() {
-    return sets.fold(0, (sum, set) => sum + (set.weight * set.reps));
+    return _service.totalWeight(sets);
   }
 
   int _calculateTotalReps() {
-    return sets.fold(0, (sum, set) => sum + set.reps);
+    return _service.totalReps(sets);
   }
 }

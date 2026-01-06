@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/exercise_structure.dart';
+import '../state/performance_state.dart';
 import 'exercise_list_page.dart';
 
 class PerformancePage extends StatelessWidget {
-  // Map associant chaque groupe musculaire à son image
-  final Map<String, String> muscleGroupImages = {
-    "Pectoraux": 'assets/icon/chest.png',
-    "Dos": 'assets/icon/back.png',
-    "Épaules": 'assets/icon/shoulders.png',
-    "Biceps": 'assets/icon/biceps.png',
-    "Triceps": 'assets/icon/triceps.png',
-    "Jambes": 'assets/icon/legs.png',
-    "Abdominaux": 'assets/icon/abdos.png',
-  };
-
   @override
   Widget build(BuildContext context) {
+    final performanceState = context.watch<PerformanceState>();
     return Scaffold(
       appBar: AppBar(
         title: Text("Performances", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -57,7 +49,7 @@ class PerformancePage extends StatelessWidget {
               itemCount: muscleGroups.length,
               itemBuilder: (context, index) {
                 final group = muscleGroups[index];
-                final imagePath = muscleGroupImages[group.name];
+                final imagePath = performanceState.muscleGroupImages[group.name];
 
                 return GestureDetector(
                   onTap: () {

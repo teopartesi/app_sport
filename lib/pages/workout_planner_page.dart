@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/workout_session.dart';
+import '../state/workout_planner_state.dart';
 import 'active_workout_page.dart';
 
 class WorkoutPlannerPage extends StatefulWidget {
@@ -8,27 +10,17 @@ class WorkoutPlannerPage extends StatefulWidget {
 }
 
 class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
-  List<String> availableExercises = [
-    "Bench Press", "Squat", "Deadlift", "Pull-Ups", "Dips",
-    "Shoulder Press", "Barbell Rows", "Leg Press", "Lunges",
-    "Bicep Curls", "Tricep Extensions", "Calf Raises", "Plank",
-    "Russian Twists", "Lat Pulldowns", "Leg Curls", "Leg Extensions"
-  ];
-  List<WorkoutSession> savedWorkouts = [];
-
   Widget _buildSelectExercisesDialog(BuildContext context) {
     TextEditingController searchController = TextEditingController();
-    List<String> filteredExercises = List.from(availableExercises);
+    final plannerState = context.read<WorkoutPlannerState>();
+    List<String> filteredExercises = List.from(plannerState.availableExercises);
     List<String> selectedExercises = [];
 
     return StatefulBuilder(
       builder: (context, setState) {
         void filterExercises(String query) {
           setState(() {
-            filteredExercises = availableExercises
-                .where((exercise) =>
-                    exercise.toLowerCase().contains(query.toLowerCase()))
-                .toList();
+            filteredExercises = plannerState.filterExercises(query);
           });
         }
 
@@ -122,12 +114,10 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
             ElevatedButton(
               onPressed: () {
                 if (workoutNameController.text.isNotEmpty) {
-                  setState(() {
-                    savedWorkouts.add(WorkoutSession(
-                      name: workoutNameController.text,
-                      exercises: selectedExercises,
-                    ));
-                  });
+                  context.read<WorkoutPlannerState>().addWorkout(
+                        workoutNameController.text,
+                        selectedExercises,
+                      );
                   Navigator.pop(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -154,6 +144,7 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final plannerState = context.watch<WorkoutPlannerState>();
     return Scaffold(
       resizeToAvoidBottomInset: true, // Permet de redimensionner les widgets
       appBar: AppBar(
@@ -171,7 +162,7 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
             ),
             SizedBox(height: 8),
             Expanded(
-              child: savedWorkouts.isEmpty
+              child: plannerState.savedWorkouts.isEmpty
                   ? Center(
                       child: Text(
                         "Aucune séance enregistrée",
@@ -179,8 +170,9 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
                       ),
                     )
                   : ListView.builder(
-                      itemCount: savedWorkouts.length,
+                      itemCount: plannerState.savedWorkouts.length,
                       itemBuilder: (context, index) {
+                        final workout = plannerState.savedWorkouts[index];
                         return Card(
                           margin: EdgeInsets.only(bottom: 8),
                           shape: RoundedRectangleBorder(
@@ -190,16 +182,16 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
                             leading: CircleAvatar(
                               backgroundColor: Theme.of(context).colorScheme.primary,
                               child: Text(
-                                savedWorkouts[index].name[0].toUpperCase(),
+                                workout.name[0].toUpperCase(),
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
                             title: Text(
-                              savedWorkouts[index].name,
+                              workout.name,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
-                              "${savedWorkouts[index].exercises.length} exercices",
+                              "${workout.exercises.length} exercices",
                               style: TextStyle(color: Colors.grey),
                             ),
                             trailing: ElevatedButton.icon(
@@ -209,7 +201,7 @@ class _WorkoutPlannerPageState extends State<WorkoutPlannerPage> {
                                 backgroundColor: Theme.of(context).colorScheme.secondary,
                                 foregroundColor: Colors.white,
                               ),
-                              onPressed: () => launchWorkout(savedWorkouts[index]),
+                              onPressed: () => launchWorkout(workout),
                             ),
                           ),
                         );

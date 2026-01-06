@@ -1,8 +1,9 @@
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import '../state/profile_state.dart';
+import '../widgets/stats_card.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -10,31 +11,15 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Uint8List? _imageBytes; // Stocke l’image de profil
-  int selectedAge = 25;
-  int selectedWeight = 70;
-  int selectedHeight = 170;
-
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
-      setState(() {
-        _imageBytes = bytes;
-      });
+      if (!mounted) {
+        return;
+      }
+      context.read<ProfileState>().updateImage(bytes);
     }
-  }
-
-  double _calculateCalories() {
-    // Formule de Harris-Benedict simplifiée
-    // Pour les hommes : MB = 66 + (13,7 × poids) + (5 × taille) - (6,8 × âge)
-    // Ceci est une approximation
-    return 66 + (13.7 * selectedWeight) + (5 * selectedHeight) - (6.8 * selectedAge);
-  }
-
-  double _calculateWaterIntake() {
-    // Recommandation approximative: 0.033L par kg de poids corporel
-    return selectedWeight * 0.033;
   }
 
   void _showPicker(BuildContext context, List<int> values, int selectedValue, Function(int) onSelected) {
@@ -58,6 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final profileState = context.watch<ProfileState>();
     return Scaffold(
       appBar: AppBar(
         title: Text("Profil", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -89,8 +75,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: CircleAvatar(
                           radius: 60,
                           backgroundColor: Colors.grey[300],
-                          backgroundImage: _imageBytes != null ? MemoryImage(_imageBytes!) : null,
-                          child: _imageBytes == null
+                          backgroundImage: profileState.imageBytes != null
+                              ? MemoryImage(profileState.imageBytes!)
+                              : null,
+                          child: profileState.imageBytes == null
                               ? Icon(Icons.camera_alt, size: 40, color: Colors.white)
                               : null,
                         ),
@@ -130,10 +118,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildInfoRow(
                         context,
                         "Âge",
-                        "$selectedAge ans",
+                        "${profileState.selectedAge} ans",
                         Icons.calendar_today,
-                        () => _showPicker(context, List.generate(81, (i) => i + 10), selectedAge, (val) {
-                          setState(() => selectedAge = val);
+                        () => _showPicker(context, List.generate(81, (i) => i + 10), profileState.selectedAge, (val) {
+                          context.read<ProfileState>().updateAge(val);
                         }),
                       ),
                       Divider(),
@@ -141,10 +129,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildInfoRow(
                         context,
                         "Poids",
-                        "$selectedWeight kg",
+                        "${profileState.selectedWeight} kg",
                         Icons.monitor_weight_outlined,
-                        () => _showPicker(context, List.generate(111, (i) => i + 40), selectedWeight, (val) {
-                          setState(() => selectedWeight = val);
+                        () => _showPicker(context, List.generate(111, (i) => i + 40), profileState.selectedWeight, (val) {
+                          context.read<ProfileState>().updateWeight(val);
                         }),
                       ),
                       Divider(),
@@ -152,10 +140,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildInfoRow(
                         context,
                         "Taille",
-                        "$selectedHeight cm",
+                        "${profileState.selectedHeight} cm",
                         Icons.height,
-                        () => _showPicker(context, List.generate(101, (i) => i + 120), selectedHeight, (val) {
-                          setState(() => selectedHeight = val);
+                        () => _showPicker(context, List.generate(101, (i) => i + 120), profileState.selectedHeight, (val) {
+                          context.read<ProfileState>().updateHeight(val);
                         }),
                       ),
                     ],
@@ -180,25 +168,25 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   StatsCard(
                     title: "IMC",
-                    value: _calculateBMI().toStringAsFixed(1),
+                    value: profileState.bmi.toStringAsFixed(1),
                     icon: Icons.monitor_weight,
-                    color: _getBMIColor(_calculateBMI()),
+                    color: profileState.bmiColor,
                   ),
                   StatsCard(
                     title: "Poids idéal",
-                    value: "${_calculateIdealWeight().toStringAsFixed(1)} kg",
+                    value: "${profileState.idealWeight.toStringAsFixed(1)} kg",
                     icon: Icons.verified,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   StatsCard(
                     title: "Calories/jour",
-                    value: "${_calculateCalories().round()}",
+                    value: "${profileState.calories.round()}",
                     icon: Icons.local_fire_department,
                     color: Colors.orange,
                   ),
                   StatsCard(
                     title: "Eau/jour",
-                    value: "${_calculateWaterIntake().round()} L",
+                    value: "${profileState.waterIntake.round()} L",
                     icon: Icons.opacity,
                     color: Colors.blue,
                   ),
@@ -223,10 +211,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       SizedBox(height: 16),
-                      _buildStatsRow("IMC", _calculateBMI().toStringAsFixed(1), 
-                          _getBMIColor(_calculateBMI())),
+                      _buildStatsRow("IMC", profileState.bmi.toStringAsFixed(1), 
+                          profileState.bmiColor),
                       SizedBox(height: 12),
-                      _buildStatsRow("Poids idéal", "${_calculateIdealWeight().toStringAsFixed(1)} kg", 
+                      _buildStatsRow("Poids idéal", "${profileState.idealWeight.toStringAsFixed(1)} kg", 
                           Theme.of(context).colorScheme.primary),
                     ],
                   ),
@@ -281,77 +269,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ],
-    );
-  }
-
-  double _calculateBMI() {
-    // Hauteur en mètres
-    double heightInMeters = selectedHeight / 100;
-    return selectedWeight / (heightInMeters * heightInMeters);
-  }
-
-  Color _getBMIColor(double bmi) {
-    if (bmi < 18.5) return Colors.blue;
-    if (bmi < 25) return Colors.green;
-    if (bmi < 30) return Colors.orange;
-    return Colors.red;
-  }
-
-  double _calculateIdealWeight() {
-    // Formule de Lorentz
-    return (selectedHeight - 100) - ((selectedHeight - 150) / 4);
-  }
-}
-
-class StatsCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  const StatsCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 40,
-              color: color,
-            ),
-            SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
