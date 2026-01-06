@@ -189,6 +189,7 @@ class _EditPerformancePageState extends State<EditPerformancePage> {
                         // Liste des séries
                         for (int i = 0; i < sets.length; i++)
                           Padding(
+                            key: ObjectKey(sets[i]),
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: Row(
                               children: [
@@ -215,7 +216,9 @@ class _EditPerformancePageState extends State<EditPerformancePage> {
                                       keyboardType: TextInputType.number,
                                       textAlign: TextAlign.center,
                                       onChanged: (value) {
-                                        sets[i].weight = int.tryParse(value) ?? 0;
+                                        setState(() {
+                                          sets[i].weight = int.tryParse(value) ?? 0;
+                                        });
                                       },
                                     ),
                                   ),
@@ -232,7 +235,9 @@ class _EditPerformancePageState extends State<EditPerformancePage> {
                                       keyboardType: TextInputType.number,
                                       textAlign: TextAlign.center,
                                       onChanged: (value) {
-                                        sets[i].reps = int.tryParse(value) ?? 0;
+                                        setState(() {
+                                          sets[i].reps = int.tryParse(value) ?? 0;
+                                        });
                                       },
                                     ),
                                   ),

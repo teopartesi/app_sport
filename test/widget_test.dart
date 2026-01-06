@@ -15,7 +15,13 @@ void main() {
     await tester.pumpWidget(SportApp()); // Assure-toi que c'est bien SportApp() le widget principal
 
     expect(find.byType(BottomNavigationBar), findsOneWidget);
-    expect(find.text("Performances"), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text("Performances"),
+      ),
+      findsOneWidget,
+    );
     expect(find.text("Planification"), findsOneWidget);
     expect(find.text("Profil"), findsOneWidget);
   });

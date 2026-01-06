@@ -20,8 +20,9 @@ class _ActiveWorkoutPageState extends State<ActiveWorkoutPage> {
       });
     } else {
       // Workout completed
+      final messenger = ScaffoldMessenger.of(context);
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text("Séance terminée !")),
       );
     }

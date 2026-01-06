@@ -1,7 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -9,7 +10,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  File? _image; // Stocke l’image de profil
+  Uint8List? _imageBytes; // Stocke l’image de profil
   int selectedAge = 25;
   int selectedWeight = 70;
   int selectedHeight = 170;
@@ -17,8 +18,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
       setState(() {
-        _image = File(pickedFile.path);
+        _imageBytes = bytes;
       });
     }
   }
@@ -87,8 +89,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: CircleAvatar(
                           radius: 60,
                           backgroundColor: Colors.grey[300],
-                          backgroundImage: _image != null ? FileImage(_image!) : null,
-                          child: _image == null
+                          backgroundImage: _imageBytes != null ? MemoryImage(_imageBytes!) : null,
+                          child: _imageBytes == null
                               ? Icon(Icons.camera_alt, size: 40, color: Colors.white)
                               : null,
                         ),

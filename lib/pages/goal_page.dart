@@ -52,9 +52,7 @@ class _GoalsPageState extends State<GoalsPage> {
       final goalIndex = goals.indexWhere((goal) => goal.id == goalId);
       if (goalIndex != -1) {
         goals[goalIndex].currentValue = newValue;
-        if (newValue >= goals[goalIndex].targetValue) {
-          goals[goalIndex].isCompleted = true;
-        }
+        goals[goalIndex].isCompleted = newValue >= goals[goalIndex].targetValue;
       }
     });
   }
@@ -211,7 +209,8 @@ class _GoalsPageState extends State<GoalsPage> {
   }
 
   Widget _buildProgressIndicator(String label, int current, int target) {
-    final double progress = current / target;
+    final int safeTarget = target <= 0 ? 1 : target;
+    final double progress = (current / safeTarget).clamp(0, 1);
     
     return Column(
       children: [
@@ -525,12 +524,15 @@ class _GoalsPageState extends State<GoalsPage> {
               child: Text("Annuler"),
             ),
             ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  weeklyStats["targetSessions"] = int.tryParse(controllers['sessions']!.text) ?? 5;
-                  weeklyStats["targetExercises"] = int.tryParse(controllers['exercises']!.text) ?? 25;
-                  weeklyStats["targetMinutes"] = int.tryParse(controllers['minutes']!.text) ?? 200;
-                });
+                  onPressed: () {
+                    setState(() {
+                      final sessionsTarget = int.tryParse(controllers['sessions']!.text) ?? 5;
+                      final exercisesTarget = int.tryParse(controllers['exercises']!.text) ?? 25;
+                      final minutesTarget = int.tryParse(controllers['minutes']!.text) ?? 200;
+                      weeklyStats["targetSessions"] = sessionsTarget < 1 ? 1 : sessionsTarget;
+                      weeklyStats["targetExercises"] = exercisesTarget < 1 ? 1 : exercisesTarget;
+                      weeklyStats["targetMinutes"] = minutesTarget < 1 ? 1 : minutesTarget;
+                    });
                 Navigator.pop(context);
               },
               child: Text("Enregistrer"),

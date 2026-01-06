@@ -15,22 +15,27 @@ class ExerciseListPage extends StatefulWidget {
 class _ExerciseListPageState extends State<ExerciseListPage> {
   Map<String, ExercisePerformance> performances = {}; // Stocke les performances
 
-void _editPerformance(BuildContext context, Exercise exercise) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => EditPerformancePage(
-        exercise: exercise,
-        initialPerformance: performances[exercise.name],
-        onSave: (performance) {
-          setState(() {
-            performances[exercise.name] = performance;
-          });
-        },
+  String _performanceKey(Exercise exercise) {
+    return "${widget.muscleGroup.name}::${exercise.name}";
+  }
+
+  void _editPerformance(BuildContext context, Exercise exercise) {
+    final key = _performanceKey(exercise);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPerformancePage(
+          exercise: exercise,
+          initialPerformance: performances[key],
+          onSave: (performance) {
+            setState(() {
+              performances[key] = performance;
+            });
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +60,7 @@ void _editPerformance(BuildContext context, Exercise exercise) {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               children: category.exercises.map((exercise) {
-                final lastPerformance = performances[exercise.name];
+                final lastPerformance = performances[_performanceKey(exercise)];
 
                 return Container(
                   margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
